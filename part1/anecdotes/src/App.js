@@ -1,27 +1,27 @@
 import React, { useState } from 'react'
 
-const MostVoteAnexdotes = ({text, anecdotes, max}) => {
-  if (!max) {
-    return (
-        <div>
-          <h1>{text}</h1>
-        </div>
-    )
-  }
-
-  return (
-    <div>
-      <h1>{text}</h1>
-      <p>{anecdotes}</p>
-      <p>has {max} votes</p>
-    </div>
-  )
-}
-
 const arr = [0, 1, 2, 3, 4, 5, 6];
 const voteCountList = [0, 0, 0, 0, 0, 0, 0];
 let max = 0;
 let maxIndex = 0;
+
+const MostVoteAnexdotes = ({text, anecdotes, max}) => {
+    if (!max) {
+        return (
+            <div>
+                <h1>{text}</h1>
+            </div>
+        )
+    }
+
+    return (
+        <div>
+            <h1>{text}</h1>
+            <p>{anecdotes}</p>
+            <p>has {max} votes</p>
+        </div>
+    )
+}
 
 const App = () => {
   const anecdotes = [
