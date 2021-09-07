@@ -1,28 +1,30 @@
 import React, {useState, useEffect} from 'react';
-import axios from "axios";
+import PhoneService from "./services/phone"
 
-import Filter from "./Filter/Filter";
-import PersonForm from "./PersonForm/PersonForm";
-import Persons from "./Persons/Persons";
+import Filter from "./components/Filter/Filter";
+import PersonForm from "./components/PersonForm/PersonForm";
+import Persons from "./components/Persons/Persons";
+import Notification from "./components/Notification/Notification";
 
 const App = () => {
     const [persons, setPersons] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [newFilterName, setNewFilterName] = useState('')
-    const [showAll, setShowAll] = useState(true);
+    const [showAll, setShowAll] = useState(true)
+    const [successMessage, setSuccessMessage] = useState(null)
+    const [errorMessage, setErrorMessage] = useState(null)
+
 
     const hook = () => {
         console.log('effect');
 
-        const eventHandler = response => {
+        const eventHandler = InitialPhone => {
             console.log('promise fulfilled')
-            setPersons(response.data)
+            setPersons(InitialPhone)
         }
 
-        axios
-            .get('http://localhost:3001/persons')
-            .then(eventHandler)
+        PhoneService.getAll().then(eventHandler)
     };
     useEffect(hook, [])
 
@@ -38,15 +40,32 @@ const App = () => {
     const addName = (event) => {
         event.preventDefault();
         if (checkRepeatName()) {
-            return alert(`${newName} is already added to phonebook`);
+            const confirm = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`);
+            if (confirm) {
+                const person = persons.find(p => p.name === newName);
+                const changedPerson = {... person, number: newNumber};
+                PhoneService.update(changedPerson).then(returnedPerson => {
+                    setPersons(personsToShow.map(p => p.id !== person.id ? p : returnedPerson))
+                    setNewName('');
+                    setNewNumber('');
+                })
+            }
+            return;
         }
         const newObj = {
             name: newName,
-            number: newNumber
+            number: newNumber,
+            id: persons.length + 1
         }
-        setPersons(persons.concat(newObj));
-        setNewName('');
-        setNewNumber('');
+        PhoneService.create(newObj).then(returnedPhone => {
+            setSuccessMessage(`Added ${returnedPhone.name}`);
+            setTimeout(() => {
+                setSuccessMessage(null);
+            }, 5000)
+            setPersons(persons.concat(returnedPhone));
+            setNewName('');
+            setNewNumber('');
+        })
     }
 
     const checkRepeatName = () => {
@@ -65,7 +84,9 @@ const App = () => {
         <div>
             <h2>Phonebook</h2>
 
-            <Filter newFilterName={newFilterName} filterNameChange={filterNameChange}  />
+            <Notification successMessage={successMessage} errorMessage={errorMessage}/>
+
+            <Filter newFilterName={newFilterName} filterNameChange={filterNameChange} />
 
             <h2>add a new</h2>
             <PersonForm addName={addName}
@@ -73,7 +94,7 @@ const App = () => {
                         newNumber={newNumber} handleNumberChange={handleNumberChange}/>
 
             <h2>Numbers</h2>
-            <Persons personsToShow={personsToShow}/>
+            <Persons personsToShow={personsToShow} setPersons={setPersons} setErrorMessage={setErrorMessage}/>
         </div>
     )
 }
