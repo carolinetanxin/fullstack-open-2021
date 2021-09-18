@@ -1,10 +1,12 @@
 const express = require('express');
 const app = express();
+app.use(express.json());
 
-// const bodyParser = require('body-parser');
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({extended: false}));
-app.use(express.json())
+var morgan = require('morgan');
+// 使用预定义的格式字符串
+app.use(morgan('tiny'));
+// 使用预定义标记的格式字符串
+morgan(':method :url :status - :response-time ms :res[content-length]');
 
 let db = require('./db');
 let phonebook = db.phonebook;
@@ -44,8 +46,8 @@ const generateId = () => {
 }
 
 const checkError = (body, res) => {
+    console.log(body);
     if (!body.name || !body.number) {
-        console.log(body);
         return res.status(400).json({
             error: 'name or number missing'
         })
@@ -74,7 +76,6 @@ app.post('/api/persons', (req, res) => {
     }
 
     phonebook = phonebook.concat(phone);
-    console.log(phone);
 
     res.json(phone)
 })
