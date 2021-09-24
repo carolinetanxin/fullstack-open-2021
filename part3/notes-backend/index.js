@@ -4,6 +4,7 @@ const app = express();
 const cors = require('cors');
 
 // use the express-static middleware
+// 指向build文件
 app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())

@@ -1,6 +1,20 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+app.use(express.static('build'))
+app.use(cors())
 app.use(express.json());
+
+const requestLogger = (request, response, next) => {
+    console.log('Method:', request.method)
+    console.log('Path:  ', request.path)
+    console.log('Body:  ', request.body)
+    console.log('---')
+    next()
+}
+
+app.use(requestLogger)
 
 var morgan = require('morgan');
 // 使用预定义的格式字符串
@@ -10,6 +24,11 @@ morgan(':method :url :status - :response-time ms :res[content-length]');
 
 let db = require('./db');
 let phonebook = db.phonebook;
+
+// define the first route
+app.get('/', (req, res) => {
+    res.send('<h1>Hello World!</h1>')
+})
 
 app.get('/api/persons', (req, res) => {
     res.json(phonebook);
@@ -80,7 +99,13 @@ app.post('/api/persons', (req, res) => {
     res.json(phone)
 })
 
-const PORT = 3001
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 });
