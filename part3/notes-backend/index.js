@@ -1,7 +1,9 @@
+// create an express app
 const express = require('express');
 const app = express();
 const cors = require('cors');
 
+// use the express-static middleware
 app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
@@ -37,6 +39,7 @@ let notes = [
     }
 ]
 
+// define the first route
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
@@ -97,6 +100,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
+// start the server listening for requests
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
