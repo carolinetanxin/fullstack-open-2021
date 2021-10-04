@@ -65,6 +65,13 @@ const App = () => {
             setPersons(persons.concat(returnedPhone));
             setNewName('');
             setNewNumber('');
+        }).catch(error => {
+            console.log('报错啦！')
+            console.log(error.response);
+            setErrorMessage(error.response.data.error)
+            setTimeout(() => {
+                setErrorMessage(null);
+            }, 5000)
         })
     }
 
