@@ -17,3 +17,7 @@ in `package.json`, if you set `baseUrl = '/api/notes'`, you should set `"proxy":
 [Click me to read (Heroku)] [2]
 
 [2]:https://devcenter.heroku.com/articles/renaming-apps#updating-git-remotes
+
+### 5. [codeName: 'AtlasError'] error connecting to MongoDB: bad auth : Authentication failed.
+
+Use your own MongoDB URI instead of course's URI
