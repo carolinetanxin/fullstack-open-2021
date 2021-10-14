@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('./blog_list_api_helper')
+const userHelper = require('./user_api_helper')
 const app = require('../app')
 
 const api = supertest(app)
@@ -13,9 +14,11 @@ beforeEach(async () => {
 
     await Blog.deleteMany({})
     console.log('cleared')
+    const userAtStart = await userHelper.usersInDb()
+    const updateUserInfo = userAtStart[0]
 
     for (let blog of helper.initialBlogs) {
-        let blogObject = new Blog(blog)
+        let blogObject = new Blog({...blog , user: updateUserInfo.id})
         await blogObject.save()
     }
 
@@ -49,7 +52,7 @@ describe('addition of a new blog', () => {
     test('a new blog added in the blog list', async () => {
         const newBlog = {
             title: "Blog list tests",
-            author: "hanchen.ye",
+            author: "mluukkai",
             url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
             likes: 666,
         }
@@ -117,9 +120,8 @@ describe('deletion of a blog', () => {
 
 describe('updating likes of blog', () => {
     test('succeeds with status code 200 if id is valid', async () => {
-        const blogAtStart = await helper.blogsInDb();
-        const blogToUpdate = blogAtStart[0];
-        console.log(blogToUpdate)
+        const blogAtStart = await helper.blogsInDb()
+        const blogToUpdate = blogAtStart[0]
 
         await api
             .put(`/api/blogs/${blogToUpdate.id}`)
