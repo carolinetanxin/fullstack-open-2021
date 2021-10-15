@@ -51,24 +51,61 @@ blogRouter.get('/:id', async (request, response, next) => {
 })
 
 blogRouter.delete('/:id', async (request, response, next) => {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!request.token || !decodedToken || !decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+    }
+    const user = await User.findById(decodedToken.id)
+    if (blog.user.toString() === userid.toString()) {
+        await Blog.findByIdAndRemove(request.params.id)
+        response.status(204).end()
+    } else {
+        return response.status(401).json({ error: "you are not this blog's creator" })
+    }
+
 })
 
 blogRouter.put('/:id', async (request, response, next) => {
-    const body = request.body
+    const blogId = request.params.id
+    const blog = await Blog.findById(blogId);
 
-    const blog = {
-        likes: body.likes
+    // console.log(blogId)
+
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!request.token || !decodedToken || !decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
     }
+    const userid = decodedToken.id;
 
-    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
+    // console.log(blog, userid)
 
-    if (updatedBlog) {
-        response.status(200).json(updatedBlog.toJSON())
+    if (blog.user.toString() === userid.toString()) {
+        const updateBlogParam = {...request.body}
+        console.log(updateBlogParam);
+        const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, updateBlogParam, {new: true})
+
+        if (updatedBlog) {
+            response.status(200).json(updatedBlog.toJSON())
+        } else {
+            response.status(404).end()
+        }
     } else {
-        response.status(404).end()
+        return response.status(401).json({ error: "you are not this blog's creator" })
     }
+
+    // const body = request.body
+    //
+    // const blog = {
+    //     likes: body.likes
+    // }
+
+    // const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
+    //
+    // if (updatedBlog) {
+    //     response.status(200).json(updatedBlog.toJSON())
+    // } else {
+    //     response.status(404).end()
+    // }
     // response.json(updatedBlog)
 })
 

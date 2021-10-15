@@ -9,7 +9,8 @@ const requestLogger = (request, response, next) => {
     logger.info('Body:  ', request.body)
     logger.info('---')
 
-    next() // 控制移动到下一个中间件
+    // 控制移动到下一个中间件
+    next()
 }
 
 const unknownEndpoint = (request, response) => {
@@ -47,9 +48,9 @@ const tokenExtractor = (request, response, next) => {
         request.token = null
     }
 
-    return request.token
-
     next()
+
+    return request.token // 该语句放在next()之前会导致请求一直挂起...express的next需要研究
 }
 
 module.exports = {
