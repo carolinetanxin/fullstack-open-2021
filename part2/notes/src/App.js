@@ -4,13 +4,46 @@ import Note from "./components/note";
 import Notification from "./components/notification";
 import Footer from "./components/footer";
 
-import NoteService from "./services/note"
+import noteService from "./services/note"
+import loginService from "./services/login"
 
 function App(props) {
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState('a new note...');
     const [showAll, setShowAll] = useState(true);
     const [errorMessage, setErrorMessage] = useState('some error happened...')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [user, setUser] = useState(null)
+
+    // login
+    const handleLogin = async (event) => {
+        event.preventDefault()
+        console.log('login in with', username, password)
+        try {
+            const user = await loginService.login({username, password})
+
+            window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
+            noteService.setToken(user.token)
+            setUser(user)
+            setUsername('')
+            setPassword('')
+        } catch (e) {
+            setErrorMessage('Wrong credentials')
+            setTimeout(() => {
+                setErrorMessage(null)
+            }, 5000)
+        }
+    }
+    // check if store logged user info
+    useEffect(() => {
+        const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+        if (loggedUserJSON) {
+            const user = JSON.parse(loggedUserJSON)
+            setUser(user)
+            noteService.setToken(user.token)
+        }
+    }, [])
 
     // get all notes
     const hook = () => {
@@ -21,7 +54,7 @@ function App(props) {
             setNotes(initialNotes)
         }
 
-        NoteService.getAll().then(eventHandler)
+        noteService.getAll().then(eventHandler)
     }
     useEffect(hook, [])
     console.log(`render ${notes.length} notes`);
@@ -35,7 +68,7 @@ function App(props) {
             important: Math.random() < 0.5,
             id: notes.length + 1
         }
-        NoteService.create(newObj).then(returnedNote => {
+        noteService.create(newObj).then(returnedNote => {
             setNotes(notes.concat(returnedNote));
             setNewNote('');
         })
@@ -58,7 +91,7 @@ function App(props) {
         const note = notes.find(n => n.id === id)
         const changedNote = { ...note, important: !note.important }
 
-        NoteService
+        noteService
             .update(changedNote).then(returnedNote => {
                 // 捕捉并替换修改项数据
                 setNotes(notesToShow.map(note => note.id !== id ? note : returnedNote))
@@ -72,10 +105,54 @@ function App(props) {
             })
     }
 
+    // 登录表单
+    const loginForm = () => {
+        return (
+            <form onSubmit={handleLogin}>
+                <div>
+                    username
+                    <input type="text"
+                           value={username}
+                           name="Username"
+                           onChange={({target}) => { setUsername(target.value) }}/>
+                </div>
+                <div>
+                    password
+                    <input type="password"
+                           value={password}
+                           name="Password"
+                           onChange={({target}) => { setPassword(target.value) }}/>
+                </div>
+                <button type="submit">login</button>
+            </form>
+        )
+    }
+
+    // 添加note表单
+    const noteForm = () => {
+        return (
+            <form onSubmit={addNote}>
+                <input value={newNote} onChange={handleNoteChange} />
+                <button type="submit">save</button>
+            </form>
+        )
+    }
+
     return (
         <div>
             <h1>Notes</h1>
             <Notification message={errorMessage}/>
+
+            {user === null ?
+                loginForm() :
+                <div>
+                    <p>
+                        {user.name} logged-in
+                        <button type="submit" onClick={() => window.localStorage.removeItem('loggedNoteappUser')}>logout</button>
+                    </p>
+                    {noteForm()}
+                </div>
+            }
 
             <div>
                 <button onClick={() => setShowAll(!showAll)}>
@@ -91,11 +168,6 @@ function App(props) {
                         toggleImportance={() => toggleImportanceOf(note.id)}/>
                 )}
             </ul>
-
-            <form onSubmit={addNote}>
-                <input value={newNote} onChange={handleNoteChange} />
-                <button type="submit">save</button>
-            </form>
 
             <Footer />
         </div>
