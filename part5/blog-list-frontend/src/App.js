@@ -15,6 +15,16 @@ const App = () => {
     )  
   }, [])
 
+  // check if store logged user info
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
   // 登录表单
   const loginForm = () => {
     return (
@@ -43,7 +53,10 @@ const App = () => {
     return (
         <div>
           <h2>blogs</h2>
-          <p>{user.username} logged in</p>
+          <p>
+            {user.username} logged in
+            <button type="submit" onClick={handleLoginOut}>logout</button>
+          </p>
           {blogs.map(blog =>
               <Blog key={blog.id} blog={blog} />
           )}
@@ -59,7 +72,7 @@ const App = () => {
       const user = await loginService.login({username, password})
 
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
+      await blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -71,6 +84,11 @@ const App = () => {
       console.log('login error')
       console.log(e)
     }
+  }
+
+  const handleLoginOut = () => {
+    window.localStorage.removeItem('loggedNoteappUser')
+    setUser(null)
   }
 
   return (
