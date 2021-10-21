@@ -9,6 +9,8 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
+  const [newBlog, setNewBlog] = useState(null)
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
@@ -48,18 +50,65 @@ const App = () => {
     )
   }
 
-  // 展示bloglist
+  // input value change
+  const handleBlogChange = (event) => {
+    setNewBlog((preValues) => {
+      return {
+        ...preValues,
+        [event.target.name]: event.target.value
+      }
+    });
+  }
+
+  // create a blog
+  const addBlog = (event) => {
+    event.preventDefault(); // 阻止提交表单的默认操作
+    console.log(newBlog)
+    blogService.create(newBlog).then(returnedBlog => {
+      setBlogs(blogs.concat(returnedBlog));
+      setNewBlog(null);
+    })
+  }
+
+  // 添加blog和展示bloglist
   const blogForm = () => {
     return (
         <div>
-          <h2>blogs</h2>
-          <p>
-            {user.username} logged in
-            <button type="submit" onClick={handleLoginOut}>logout</button>
-          </p>
-          {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog} />
-          )}
+          <div className="login-in-title">
+            <h2>blogs</h2>
+            <p>
+              {user.username} logged in
+              <button type="submit" onClick={handleLoginOut}>logout</button>
+            </p>
+          </div>
+
+          <div className="create-new-blog">
+            <h2>create new</h2>
+            <form onSubmit={addBlog}>
+              <div>
+                <label>title:</label>
+                <input value={newBlog?.title} name="title" onChange={handleBlogChange} />
+              </div>
+
+              <div>
+                <label>author:</label>
+                <input value={newBlog?.author} name="author" onChange={handleBlogChange} />
+              </div>
+
+              <div>
+                <label>url:</label>
+                <input value={newBlog?.url} name="url" onChange={handleBlogChange} />
+              </div>
+
+              <button type="submit">create</button>
+            </form>
+          </div>
+
+          <div className="blog-list">
+            {blogs.map(blog =>
+                <Blog key={blog.id} blog={blog} />
+            )}
+          </div>
         </div>
     )
   }
