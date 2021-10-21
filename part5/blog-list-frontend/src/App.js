@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
+
 import blogService from './services/blogs'
 import loginService from "./services/login";
 
@@ -10,6 +12,8 @@ const App = () => {
   const [user, setUser] = useState(null)
 
   const [newBlog, setNewBlog] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -50,32 +54,15 @@ const App = () => {
     )
   }
 
-  // input value change
-  const handleBlogChange = (event) => {
-    setNewBlog((preValues) => {
-      return {
-        ...preValues,
-        [event.target.name]: event.target.value
-      }
-    });
-  }
-
-  // create a blog
-  const addBlog = (event) => {
-    event.preventDefault(); // 阻止提交表单的默认操作
-    console.log(newBlog)
-    blogService.create(newBlog).then(returnedBlog => {
-      setBlogs(blogs.concat(returnedBlog));
-      setNewBlog(null);
-    })
-  }
-
   // 添加blog和展示bloglist
   const blogForm = () => {
     return (
         <div>
           <div className="login-in-title">
             <h2>blogs</h2>
+
+            <Notification successMessage={successMessage} errorMessage={errorMessage}/>
+
             <p>
               {user.username} logged in
               <button type="submit" onClick={handleLoginOut}>logout</button>
@@ -119,19 +106,21 @@ const App = () => {
     console.log('login in with', username, password)
     try {
       const user = await loginService.login({username, password})
+      setSuccessMessage(`hello, ${user.username}`)
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
 
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
       await blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (e) {
-      // setErrorMessage('Wrong credentials')
-      // setTimeout(() => {
-      //   setErrorMessage(null)
-      // }, 5000)
-      console.log('login error')
-      console.log(e)
+    } catch (error) {
+      setErrorMessage(error.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
     }
   }
 
@@ -140,11 +129,43 @@ const App = () => {
     setUser(null)
   }
 
+
+  // input value change
+  const handleBlogChange = (event) => {
+    setNewBlog((preValues) => {
+      return {
+        ...preValues,
+        [event.target.name]: event.target.value
+      }
+    });
+  }
+
+  // create a blog
+  const addBlog = async (event) => {
+    event.preventDefault(); // 阻止提交表单的默认操作
+    // console.log(newBlog)
+    try {
+      const returnedBlog = await blogService.create(newBlog)
+      setBlogs(blogs.concat(returnedBlog));
+      setNewBlog(null);
+      setSuccessMessage(`${newBlog.title} by ${newBlog.author}`)
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
+    } catch (error) {
+      setErrorMessage(error.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
   return (
     <div>
       {user === null ? (
           <div>
             <h2>log in to application</h2>
+            <Notification successMessage={successMessage} errorMessage={errorMessage}/>
             {loginForm()}
           </div>
       ) : blogForm()}

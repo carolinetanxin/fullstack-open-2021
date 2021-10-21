@@ -19,7 +19,7 @@ blogRouter.post('/', async (request, response, next) => {
     const user = await User.findById(decodedToken.id)
 
     if (!body.title || !body.url) {
-        response.status(400).end()
+        response.status(400).json({ error: 'title or url missing' }).end()
     } else {
         const blog = new Blog({
             title: body.title,
