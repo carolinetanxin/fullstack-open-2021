@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 
 import Note from "./components/note";
 import Notification from "./components/notification";
@@ -7,14 +7,20 @@ import Footer from "./components/footer";
 import noteService from "./services/note"
 import loginService from "./services/login"
 
+import Togglable from "./components/Togglable";
+import LoginForm from "./components/loginForm";
+import NoteForm from "./components/noteForm";
+
 function App(props) {
     const [notes, setNotes] = useState([]);
-    const [newNote, setNewNote] = useState('a new note...');
+
     const [showAll, setShowAll] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('some error happened...')
+    const [errorMessage, setErrorMessage] = useState(null)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [user, setUser] = useState(null)
+
+    const noteFormRef = useRef()
 
     // login
     const handleLogin = async (event) => {
@@ -59,26 +65,6 @@ function App(props) {
     useEffect(hook, [])
     console.log(`render ${notes.length} notes`);
 
-    // creat a note
-    const addNote = (event) => {
-        event.preventDefault(); // 阻止提交表单的默认操作
-        const newObj = {
-            content: newNote,
-            date: new Date().toISOString(),
-            important: Math.random() < 0.5,
-            id: notes.length + 1
-        }
-        noteService.create(newObj).then(returnedNote => {
-            setNotes(notes.concat(returnedNote));
-            setNewNote('');
-        })
-    }
-
-    const handleNoteChange = (event) => {
-        // console.log(event.target.value);
-        setNewNote(event.target.value);
-    }
-
     const notesToShow = showAll
         ? notes
         : notes.filter(note => note.important);
@@ -105,36 +91,34 @@ function App(props) {
             })
     }
 
+    const createNote = (newObj) => {
+        noteFormRef.current.toggleVisibility()
+        noteService.create(newObj).then(returnedNote => {
+            setNotes(notes.concat(returnedNote));
+        })
+    }
+
     // 登录表单
     const loginForm = () => {
         return (
-            <form onSubmit={handleLogin}>
-                <div>
-                    username
-                    <input type="text"
-                           value={username}
-                           name="Username"
-                           onChange={({target}) => { setUsername(target.value) }}/>
-                </div>
-                <div>
-                    password
-                    <input type="password"
-                           value={password}
-                           name="Password"
-                           onChange={({target}) => { setPassword(target.value) }}/>
-                </div>
-                <button type="submit">login</button>
-            </form>
+            <Togglable buttonLabel='log in'>
+                <LoginForm
+                    username={username}
+                    password={password}
+                    handleUsernameChange={(target) => setUsername(target.value)}
+                    handlePasswordChange={(target) => setPassword(target.value)}
+                    handleSubmit={handleLogin}
+                />
+            </Togglable>
         )
     }
 
     // 添加note表单
     const noteForm = () => {
         return (
-            <form onSubmit={addNote}>
-                <input value={newNote} onChange={handleNoteChange} />
-                <button type="submit">save</button>
-            </form>
+            <Togglable buttonLabel="new note" ref={noteFormRef}>
+                <NoteForm createNote={createNote}/>
+            </Togglable>
         )
     }
 
