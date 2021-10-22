@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import Togglable from "./components/Togglable"
+import BlogForm from "./components/BlogForm"
 
 import blogService from './services/blogs'
-import loginService from "./services/login";
+import loginService from "./services/login"
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -11,9 +14,10 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  const [newBlog, setNewBlog] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -61,6 +65,7 @@ const App = () => {
           <div className="login-in-title">
             <h2>blogs</h2>
 
+
             <Notification successMessage={successMessage} errorMessage={errorMessage}/>
 
             <p>
@@ -69,27 +74,9 @@ const App = () => {
             </p>
           </div>
 
-          <div className="create-new-blog">
-            <h2>create new</h2>
-            <form onSubmit={addBlog}>
-              <div>
-                <label>title:</label>
-                <input value={newBlog?.title} name="title" onChange={handleBlogChange} />
-              </div>
-
-              <div>
-                <label>author:</label>
-                <input value={newBlog?.author} name="author" onChange={handleBlogChange} />
-              </div>
-
-              <div>
-                <label>url:</label>
-                <input value={newBlog?.url} name="url" onChange={handleBlogChange} />
-              </div>
-
-              <button type="submit">create</button>
-            </form>
-          </div>
+          <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+            <BlogForm createBlog={addBlog}/>
+          </Togglable>
 
           <div className="blog-list">
             {blogs.map(blog =>
@@ -129,25 +116,11 @@ const App = () => {
     setUser(null)
   }
 
-
-  // input value change
-  const handleBlogChange = (event) => {
-    setNewBlog((preValues) => {
-      return {
-        ...preValues,
-        [event.target.name]: event.target.value
-      }
-    });
-  }
-
   // create a blog
-  const addBlog = async (event) => {
-    event.preventDefault(); // 阻止提交表单的默认操作
-    // console.log(newBlog)
+  const addBlog = async (newBlog) => {
     try {
       const returnedBlog = await blogService.create(newBlog)
       setBlogs(blogs.concat(returnedBlog));
-      setNewBlog(null);
       setSuccessMessage(`${newBlog.title} by ${newBlog.author}`)
       setTimeout(() => {
         setSuccessMessage(null)
