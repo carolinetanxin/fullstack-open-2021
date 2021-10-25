@@ -1,4 +1,5 @@
 const Notification = ({successMessage, errorMessage}) => {
+
     if (!successMessage && !errorMessage) {
         return null
     }
