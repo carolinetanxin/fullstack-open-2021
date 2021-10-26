@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 
 const Blog = ({
     blog,
@@ -15,23 +15,23 @@ const Blog = ({
 
     const [visible, setVisible] = useState(false)
 
-    const hideWhenVisible = {display: visible ? 'none' : ''}
-    const showWhenVisible = {display: visible ? '' : 'none'}
+    const hideWhenVisible = { display: visible ? 'none' : '' }
+    const showWhenVisible = { display: visible ? '' : 'none' }
 
     const toggleVisibility = () => {
         setVisible(!visible)
     }
 
     const handleLikeChange = () => {
-        const updateObj = {...blog}
-        updateObj.likes = updateObj.likes + 1;
+        const updateObj = { ...blog }
+        updateObj.likes = updateObj.likes + 1
         updateBlog(updateObj)
     }
 
     const handleRemoveBlog = () => {
         const confirmRemove = window.confirm(`${blog.title} by ${blog.auth}`)
         if (confirmRemove) {
-            const removeObj = {...blog}
+            const removeObj = { ...blog }
             removeBlog(removeObj)
         }
     }

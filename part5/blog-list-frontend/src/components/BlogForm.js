@@ -1,6 +1,6 @@
-import React, {useState} from "react";
+import React, { useState } from 'react'
 
-const BlogForm = ({createBlog}) => {
+const BlogForm = ({ createBlog }) => {
     const [newBlog, setNewBlog] = useState(null)
 
     // input value change
@@ -10,12 +10,12 @@ const BlogForm = ({createBlog}) => {
                 ...preValues,
                 [event.target.name]: event.target.value
             }
-        });
+        })
     }
 
     const addBlog = async (event) => {
-        event.preventDefault(); // 阻止提交表单的默认操作
-        createBlog(newBlog);
+        event.preventDefault() // 阻止提交表单的默认操作
+        createBlog(newBlog)
         setNewBlog(null)
     }
 

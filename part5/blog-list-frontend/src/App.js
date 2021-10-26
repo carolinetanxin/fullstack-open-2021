@@ -1,17 +1,16 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
-import BlogForm from "./components/BlogForm"
+import BlogForm from './components/BlogForm'
+import LoginForm from './components/loginForm'
 
 import blogService from './services/blogs'
-import loginService from "./services/login"
+import loginService from './services/login'
 
 const App = () => {
     const [blogs, setBlogs] = useState([])
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
     const [user, setUser] = useState(null)
 
     const [successMessage, setSuccessMessage] = useState(null)
@@ -38,27 +37,9 @@ const App = () => {
     // 登录表单
     const loginForm = () => {
         return (
-            <form onSubmit={handleLogin}>
-                <div>
-                    username
-                    <input type="text"
-                           value={username}
-                           name="Username"
-                           onChange={({target}) => {
-                               setUsername(target.value)
-                           }}/>
-                </div>
-                <div>
-                    password
-                    <input type="password"
-                           value={password}
-                           name="Password"
-                           onChange={({target}) => {
-                               setPassword(target.value)
-                           }}/>
-                </div>
-                <button type="submit">login</button>
-            </form>
+            <Togglable buttonLabel='log in'>
+                <LoginForm handleSubmit={handleLogin} />
+            </Togglable>
         )
     }
 
@@ -66,7 +47,7 @@ const App = () => {
     const blogForm = () => {
         return (
             <div>
-                <div className="login-in-title">
+                <div className='login-in-title'>
                     <h2>blogs</h2>
 
 
@@ -74,15 +55,15 @@ const App = () => {
 
                     <p>
                         {user.username} logged in
-                        <button type="submit" onClick={handleLoginOut}>logout</button>
+                        <button type='submit' onClick={handleLoginOut}>logout</button>
                     </p>
                 </div>
 
-                <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+                <Togglable buttonLabel='create new blog' ref={blogFormRef}>
                     <BlogForm createBlog={addBlog}/>
                 </Togglable>
 
-                <div className="blog-list">
+                <div className='blog-list'>
                     {blogs.map(blog =>
                         <Blog key={blog.id} blog={blog}
                               updateBlog={updateBlog}
@@ -95,10 +76,12 @@ const App = () => {
 
     // login
     const handleLogin = async (event) => {
-        event.preventDefault()
-        console.log('login in with', username, password)
         try {
-            const user = await loginService.login({username, password})
+            const username = event.username
+            const password = event.password
+            console.log('login in with', username, password)
+
+            const user = await loginService.login({ username, password })
             setSuccessMessage(`hello, ${user.username}`)
             setTimeout(() => {
                 setSuccessMessage(null)
@@ -107,10 +90,10 @@ const App = () => {
             window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
             await blogService.setToken(user.token)
             setUser(user)
-            setUsername('')
-            setPassword('')
         } catch (error) {
-            setErrorMessage(error.response.data.error)
+            // console.log(event)
+            // console.log(error)
+            setErrorMessage(error.response)
             setTimeout(() => {
                 setErrorMessage(null)
             }, 5000)
@@ -126,7 +109,7 @@ const App = () => {
     const addBlog = async (newBlog) => {
         try {
             const returnedBlog = await blogService.create(newBlog)
-            setBlogs(blogs.concat(returnedBlog));
+            setBlogs(blogs.concat(returnedBlog))
             setSuccessMessage(`${newBlog.title} by ${newBlog.author}`)
             setTimeout(() => {
                 setSuccessMessage(null)
@@ -146,9 +129,9 @@ const App = () => {
                 likes: updateBlog.likes
             }
 
-            const updatedBlog = await blogService.update(updateBlog.id, updateObj)
+            await blogService.update(updateBlog.id, updateObj)
             const returnedBlog = await blogService.getAll()
-            setBlogs(returnedBlog);
+            setBlogs(returnedBlog)
             setSuccessMessage(`${updateBlog.title} by ${updateBlog.author} likes update`)
             setTimeout(() => {
                 setSuccessMessage(null)
@@ -164,7 +147,7 @@ const App = () => {
     // remove blog props
     const removeBlog = async (removeBlog) => {
         try {
-            const removedBlog = await blogService.remove(removeBlog.id)
+            await blogService.remove(removeBlog.id)
             setBlogs(blogs.filter(blog => blog.id !== removeBlog.id).sort((a, b) => b.likes - a.likes))
             setSuccessMessage(`${removeBlog.title} by ${removeBlog.author} deleted`)
             setTimeout(() => {

@@ -1,4 +1,6 @@
-const Notification = ({successMessage, errorMessage}) => {
+import React from 'react'
+
+const Notification = ({ successMessage, errorMessage }) => {
 
     if (!successMessage && !errorMessage) {
         return null
@@ -21,4 +23,4 @@ const Notification = ({successMessage, errorMessage}) => {
     }
 }
 
-export default Notification;
+export default Notification
