@@ -48,7 +48,7 @@ const App = () => {
         return (
             <div>
                 <div className='login-in-title'>
-                    <h2>blogs</h2>
+                    <h2>Blogs</h2>
 
 
                     <Notification successMessage={successMessage} errorMessage={errorMessage}/>
@@ -93,7 +93,7 @@ const App = () => {
         } catch (error) {
             // console.log(event)
             // console.log(error)
-            setErrorMessage(error.response)
+            setErrorMessage(error.response.data.error)
             setTimeout(() => {
                 setErrorMessage(null)
             }, 5000)
@@ -166,11 +166,12 @@ const App = () => {
         <div>
             {user === null ? (
                 <div>
-                    <h2>log in to application</h2>
+                    <h2>Log in to application</h2>
                     <Notification successMessage={successMessage} errorMessage={errorMessage}/>
                     {loginForm()}
                 </div>
             ) : blogForm()}
+            <div>Blog app, Department of Computer Science, University of Helsinki 2021</div>
         </div>
     )
 }
