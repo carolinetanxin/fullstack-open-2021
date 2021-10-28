@@ -46,8 +46,8 @@ const Blog = ({
             <div className="blogDetail" style={showWhenVisible}>
                 <div>{blog.url}</div>
                 <div>
-                    <span>likes {blog.likes}</span>
-                    <button onClick={handleLikeChange}>like</button>
+                    <span className='likesNum'>likes {blog.likes}</span>
+                    <button className='handleLike' onClick={handleLikeChange}>like</button>
                 </div>
                 <button onClick={handleRemoveBlog}>remove</button>
             </div>
