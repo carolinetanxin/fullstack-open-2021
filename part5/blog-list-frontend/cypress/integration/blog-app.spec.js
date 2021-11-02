@@ -108,9 +108,9 @@ describe('Blog app', function() {
         describe('add a note exists', function () {
             beforeEach(function () {
                 // 绕开UI创建blog
-                cy.createBlog({ title: 'first new blog can be created by cypress', author: 'hanchen.ye', url: 'www.google1.com', likes: 1})
+                cy.createBlog({ title: 'first new blog can be created by cypress', author: 'hanchen.ye', url: 'www.google1.com', likes: 12})
                 cy.createBlog({ title: 'second new blog can be created by cypress', author: 'hanchen.ye', url: 'www.google2.com', likes: 8})
-                cy.createBlog({ title: 'third new blog can be created by cypress', author: 'hanchen.ye', url: 'www.google3.com', likes: 12})
+                cy.createBlog({ title: 'third new blog can be created by cypress', author: 'hanchen.ye', url: 'www.google3.com', likes: 2})
             })
 
             // .parent().find().搜索指定元素
@@ -132,18 +132,41 @@ describe('Blog app', function() {
                 cy.contains('remove').click()
                 cy.get('first new blog can be created by cypress').should('not.exist')
             })
+            
+            it.only('blogs are ordered by number of likes', function () {
+                // 点击，将所有博客细节展开
+                cy.get('.handleView').then(($views) => {
+                      $views.map((i, el) => {
+                          el.click()
+                      })
+                })
 
-            it.only('then example', function () {
+                cy.get('.likesNum').then(($blogs) => {
+                    expect($blogs).to.have.length(3)
+                    $blogs.map(function(i, el) {
+                        // 各项检查：后一项的like比前一项低
+                        if(i !== 0) {
+                            expect(
+                                Number(el.innerText)
+                            ).to.be.most(
+                                Number($blogs[i-1].innerText)
+                            )
+                        }
+                    })
+                })
+            })
+
+            // it.only('then example', function () {
                 // cy.wrap声明页面元素Element
                 // https://www.cnblogs.com/poloyy/p/13672255.html
-                cy.get('.blog').then(blogs => {
-                    cy.wrap(blogs[0]).contains('first new blog')
-                })
+                // cy.get('.blog').then(blogs => {
+                    // cy.wrap(blogs[0]).contains('first new blog')
+                // })
                 // cy.get('button').then((buttons) => {
                     // console.log('number of buttons', buttons.length)
                     // cy.wrap(buttons[0]).click()
                 // })
-            })
+            // })
 
         })
 

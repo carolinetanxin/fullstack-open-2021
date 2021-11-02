@@ -40,13 +40,14 @@ const Blog = ({
         <div style={blogStyle} className='blog'>
             <div>
                 <b>{blog.title}</b> by <i>{blog.author}</i>
-                <button onClick={toggleVisibility} style={hideWhenVisible}>view</button>
+                <button className='handleView' onClick={toggleVisibility} style={hideWhenVisible}>view</button>
                 <button onClick={toggleVisibility} style={showWhenVisible}>hide</button>
             </div>
             <div className="blogDetail" style={showWhenVisible}>
                 <div>{blog.url}</div>
                 <div>
-                    <span className='likesNum'>likes {blog.likes}</span>
+                    <span>likes </span>
+                    <span className='likesNum'>{blog.likes}</span>
                     <button className='handleLike' onClick={handleLikeChange}>like</button>
                 </div>
                 <button onClick={handleRemoveBlog}>remove</button>
