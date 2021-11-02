@@ -10,6 +10,11 @@
 
 // 建议使用function()代替箭头函数，避免报错
 
+// 如何跑结果
+// 1.part4/blog-list文件 运行指令：npm run start:test
+// 2.part5/blog-list-frontend文件 运行指令：npm run start
+// 3.part5/blog-list-frontend文件 运行指令：npm run cypress:open
+
 describe('Blog app', function() {
     // 通过UI登录
     beforeEach(function () {
