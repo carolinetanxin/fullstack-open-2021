@@ -138,7 +138,7 @@ describe('Blog app', function() {
                 cy.get('first new blog can be created by cypress').should('not.exist')
             })
             
-            it.only('blogs are ordered by number of likes', function () {
+            it('blogs are ordered by number of likes', function () {
                 // 点击，将所有博客细节展开
                 cy.get('.handleView').then(($views) => {
                       $views.map((i, el) => {
