@@ -1,4 +1,3 @@
-import {useDispatch} from "react-redux";
 
 const anecdotesAtStart = [
   'If it hurts, do it more often',
@@ -21,9 +20,10 @@ const asObject = (anecdote) => {
 
 export const initialState = anecdotesAtStart.map(asObject)
 
-const reducer = (state = initialState, action) => {
-  console.log('state now: ', state)
-  console.log('action', action)
+const anecdotesReducer = (state = initialState, action) => {
+  // console.log('anecdotesReducer ------------')
+  // console.log('state now: ', state)
+  // console.log('action', action)
 
   switch (action.type) {
     case 'VOTE': {
@@ -69,4 +69,4 @@ export const createAnecdote = (content) => {
 }
 
 
-export default reducer
+export default anecdotesReducer
