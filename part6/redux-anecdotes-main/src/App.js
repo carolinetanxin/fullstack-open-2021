@@ -12,8 +12,7 @@ import {initialAnecdotes} from "./reducers/anecdoteReducer"
 const App = () => {
     const dispatch = useDispatch()
     useEffect(() => {
-        // dispatch(initialAnecdotes())
-        anecdotesService.getAll().then(anecdotes => dispatch(initialAnecdotes(anecdotes)))
+        dispatch(initialAnecdotes())
     }, [dispatch])
 
     return (

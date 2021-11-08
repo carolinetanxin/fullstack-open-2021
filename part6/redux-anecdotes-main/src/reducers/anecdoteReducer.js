@@ -10,10 +10,11 @@ const anecdotesReducer = (state = [], action) => {
   switch (action.type) {
     case 'VOTE': {
       const { id } = action.data
-      const voteAnecdote = state.find((anecdote) => anecdote.id === id)
-      const updateVoteAnecdote = {...voteAnecdote, votes: voteAnecdote.votes + 1}
-
-      return state.map(anecdote => anecdote.id !== id ? anecdote : updateVoteAnecdote)
+      // const voteAnecdote = state.find((anecdote) => anecdote.id === id)
+      // const updateVoteAnecdote = {...voteAnecdote, votes: voteAnecdote.votes + 1}
+      //
+      // return state.map(anecdote => anecdote.id !== id ? anecdote : updateVoteAnecdote)
+      return state.map(anecdote => anecdote.id !== id ? anecdote : action.data)
     }
 
     case 'NEW_ANECDOTE': {
@@ -31,42 +32,41 @@ const anecdotesReducer = (state = [], action) => {
 }
 
 // 初始化获取所有列表
-export const initialAnecdotes = (anecdotes) => {
-  return {
-    type: "INIT_ANECDOTES",
-    data: anecdotes
+export const initialAnecdotes = () => {
+  return async dispatch => {
+    const anecdotes = await anecdoteService.getAll()
+    dispatch({
+      type: "INIT_ANECDOTES",
+      data: anecdotes
+    })
   }
 }
 
 // 投票
-export const voteAnecdote = async (votedAnecdote) => {
-  const anecdote = {
-    ...votedAnecdote,
-    votes: votedAnecdote.votes + 1
-  }
-  const updatedAnecdote = await anecdoteService.update(anecdote)
-  const { id } = updatedAnecdote
-
-  return {
-    type: 'VOTE',
-    data: { id }
+export const voteAnecdote = (votedAnecdote) => {
+  return async dispatch => {
+    const anecdote = {
+      ...votedAnecdote,
+      votes: votedAnecdote.votes + 1
+    }
+    const updatedAnecdote = await anecdoteService.update(anecdote)
+    dispatch({
+        type: 'VOTE',
+        data: updatedAnecdote
+    })
   }
 }
 
 // 新增八卦
-export const createAnecdote = (data) => {
-  return function (dispatch) {
-    console.log(data, dispatch)
-
-    return anecdoteService.createNew(data).then(newAnecdote => {
-      dispatch ({
-        type: 'NEW_ANECDOTE',
-        data: newAnecdote
-      })
+export const createAnecdote = (content) => {
+  return async dispatch => {
+    console.log(content, dispatch)
+    const newAnecdote = await anecdoteService.createNew(content)
+    dispatch ({
+      type: 'NEW_ANECDOTE',
+      data: newAnecdote
     })
   }
-
-
 }
 
 

@@ -14,5 +14,5 @@ const reducer = combineReducers({
 
 export const store = createStore(
     reducer,
-    composeWithDevTools(applyMiddleware(thunk)) // redux.js:200 Uncaught Error: Actions must be plain objects. Use custom middleware for async actions.
+    composeWithDevTools(applyMiddleware(thunk))
 )
