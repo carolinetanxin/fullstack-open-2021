@@ -60,7 +60,6 @@ export const voteAnecdote = (votedAnecdote) => {
 // 新增八卦
 export const createAnecdote = (content) => {
   return async dispatch => {
-    console.log(content, dispatch)
     const newAnecdote = await anecdoteService.createNew(content)
     dispatch ({
       type: 'NEW_ANECDOTE',

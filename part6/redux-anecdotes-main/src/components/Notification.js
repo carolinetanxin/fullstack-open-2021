@@ -6,7 +6,7 @@ const Notification = () => {
   const style = {
     border: 'solid',
     padding: 10,
-    borderWidth: 1
+    borderWidth: notification !== '' ? 2 : 0
   }
   return (
     <div style={style}>

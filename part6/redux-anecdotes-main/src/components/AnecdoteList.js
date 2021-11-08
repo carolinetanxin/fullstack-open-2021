@@ -1,28 +1,20 @@
 import React from 'react'
-import {useDispatch, useSelector} from "react-redux"
+import { connect } from "react-redux"
 
 import { voteAnecdote } from "../reducers/anecdoteReducer"
 import { setNotification } from "../reducers/notificationReducer"
 
-const AnecdoteList = (() => {
-    const dispatch = useDispatch()
-    // state返回存储的整个状态
-    // 使用combineReducers，要使用state.xxx返回存储的某个字段
-    const anecdotes = useSelector(state => state.anecdotes)
-    const filter = useSelector(state => state.filter)
-    // console.log(filter)
-
+const AnecdoteList = ((props) => {
     const filterAnecdotes = () => {
-        // console.log(anecdotes)
-        if (filter === '') { return anecdotes }
-        return anecdotes.filter((anecdote) => {
-            return anecdote.content.toLowerCase().includes(filter.toLowerCase())
+        if (props.filter === '') { return props.anecdotes }
+        return props.anecdotes.filter((anecdote) => {
+            return anecdote.content.toLowerCase().includes(props.filter.toLowerCase())
         })
     }
 
     const vote = (votedAnecdote) => {
-        dispatch(voteAnecdote(votedAnecdote))
-        dispatch(setNotification(`you voted ${votedAnecdote.content}`, 5))
+        props.voteAnecdote(votedAnecdote)
+        props.setNotification(`you voted ${votedAnecdote.content}`, 5)
     }
 
     return (
@@ -44,4 +36,22 @@ const AnecdoteList = (() => {
     )
 })
 
-export default AnecdoteList
+// state代替useSelector
+const mapStateToProps = (state) => {
+    return {
+        anecdotes: state.anecdotes,
+        filter: state.filter,
+    }
+}
+
+// dispatch代替useDispatch
+const mapDispatchToProps = {
+    voteAnecdote,
+    setNotification
+}
+
+const ConnectedAnecdoteList = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(AnecdoteList)
+export default ConnectedAnecdoteList
