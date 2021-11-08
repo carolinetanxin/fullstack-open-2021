@@ -1,26 +1,8 @@
+import anecdoteService from '../services/anecdotes'
 
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-]
+export const getId = () => (100000 * Math.random()).toFixed(0)
 
-const getId = () => (100000 * Math.random()).toFixed(0)
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
-
-export const initialState = anecdotesAtStart.map(asObject)
-
-const anecdotesReducer = (state = initialState, action) => {
+const anecdotesReducer = (state = [], action) => {
   // console.log('anecdotesReducer ------------')
   // console.log('state now: ', state)
   // console.log('action', action)
@@ -38,15 +20,32 @@ const anecdotesReducer = (state = initialState, action) => {
       return [...state, action.data]
     }
 
+    case 'INIT_ANECDOTES': {
+      return action.data
+    }
+
     default:
       return state
   }
 
 }
 
+// 初始化获取所有列表
+export const initialAnecdotes = (anecdotes) => {
+  return {
+    type: "INIT_ANECDOTES",
+    data: anecdotes
+  }
+}
+
 // 投票
-export const voteAnecdote = (votedAnecdote) => {
-  const { id } = votedAnecdote
+export const voteAnecdote = async (votedAnecdote) => {
+  const anecdote = {
+    ...votedAnecdote,
+    votes: votedAnecdote.votes + 1
+  }
+  const updatedAnecdote = await anecdoteService.update(anecdote)
+  const { id } = updatedAnecdote
 
   return {
     type: 'VOTE',
@@ -55,17 +54,19 @@ export const voteAnecdote = (votedAnecdote) => {
 }
 
 // 新增八卦
-export const createAnecdote = (content) => {
-  const newAnecdote = {
-    content,
-    id: getId(),
-    votes: 0
+export const createAnecdote = (data) => {
+  return function (dispatch) {
+    console.log(data, dispatch)
+
+    return anecdoteService.createNew(data).then(newAnecdote => {
+      dispatch ({
+        type: 'NEW_ANECDOTE',
+        data: newAnecdote
+      })
+    })
   }
 
-  return {
-    type: 'NEW_ANECDOTE',
-    data: newAnecdote
-  }
+
 }
 
 

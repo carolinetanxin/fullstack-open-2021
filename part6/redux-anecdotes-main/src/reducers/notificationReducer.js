@@ -21,14 +21,14 @@ const notificationReducer = (state = initialState, action) => {
 
 }
 
-export const setNotification = (message, delay) => {
+export const setNotification = (message, delayTime) => {
     return {
         type: 'SET_MESSAGE',
         data: {
             message,
             delay: setTimeout(() => {
                 removeNotification("")
-            }, delay * 1000)
+            }, delayTime * 1000)
         }
     }
 }

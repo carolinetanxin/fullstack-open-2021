@@ -10,9 +10,10 @@ const AnecdoteList = (() => {
     // 使用combineReducers，要使用state.xxx返回存储的某个字段
     const anecdotes = useSelector(state => state.anecdotes)
     const filter = useSelector(state => state.filter)
-    console.log(filter)
+    // console.log(filter)
 
     const filterAnecdotes = () => {
+        // console.log(anecdotes)
         if (filter === '') { return anecdotes }
         return anecdotes.filter((anecdote) => {
             return anecdote.content.toLowerCase().includes(filter.toLowerCase())

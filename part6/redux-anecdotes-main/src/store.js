@@ -1,4 +1,5 @@
-import { createStore, combineReducers } from 'redux'
+import { createStore, combineReducers, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 
 import anecdotesReducer from "./reducers/anecdoteReducer"
@@ -13,5 +14,5 @@ const reducer = combineReducers({
 
 export const store = createStore(
     reducer,
-    composeWithDevTools()
+    composeWithDevTools(applyMiddleware(thunk)) // redux.js:200 Uncaught Error: Actions must be plain objects. Use custom middleware for async actions.
 )
