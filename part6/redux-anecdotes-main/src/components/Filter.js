@@ -12,7 +12,7 @@ const Filter = (() => {
     const handleChange = (event) => {
         const filterValue = event.target.value
         dispatch(filterChange({filter: filterValue}))
-    };
+    }
 
     const style = {
         marginBottom: 10
