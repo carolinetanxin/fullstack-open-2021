@@ -1,0 +1,9 @@
+.users_table {
+    width: 250px;
+}
+
+.users_table_thead, .users_table_tr {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}

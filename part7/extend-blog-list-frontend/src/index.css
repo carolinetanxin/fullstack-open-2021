@@ -1,0 +1,22 @@
+/*Notification*/
+.success, .error {
+  background: lightgrey;
+  font-size: 20px;
+  border-style: solid;
+  /*firefox is not support 'border-style: solid'*/
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-right-style: solid;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.success{
+  color: green;
+}
+
+.error{
+  color: rgb(255, 0, 0);
+}
