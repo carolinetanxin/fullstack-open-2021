@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import '../style/users.css'
+import '../style/Users.css'
 
 const UsersPage = () => {
     const users = useSelector((state) => state.users)

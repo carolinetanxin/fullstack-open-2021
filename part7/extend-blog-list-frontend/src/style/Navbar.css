@@ -1,0 +1,9 @@
+.nav-bar {
+    display: flex;
+}
+
+.nav-bar-item, .login-info {
+    margin-right: 5px;
+}
+
+

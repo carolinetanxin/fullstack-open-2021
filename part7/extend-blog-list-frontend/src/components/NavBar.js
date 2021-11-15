@@ -1,6 +1,10 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../reducers/loginReducer'
+import '../style/Navbar.css'
+
+import Nav from 'react-bootstrap/Nav'
+import Button from 'react-bootstrap/Button'
 
 const NavBar = () => {
     const dispatch = useDispatch()
@@ -17,14 +21,22 @@ const NavBar = () => {
     }
 
     return (
-        <div>
-            <h1>Blogs</h1>
+        <Nav className="nav-bar" activeKey="/blogs">
+            <Nav.Item>
+                <Nav.Link href="/blogs">blogs</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+                <Nav.Link href="/users">users</Nav.Link>
+            </Nav.Item>
 
-            <p>
+            <Nav.Link eventKey="disabled" disabled>
                 {user?.username} logged in
-                <button type='submit' onClick={handleLoginOut}>logout</button>
-            </p>
-        </div>
+            </Nav.Link>
+            <Button variant="link"
+                    size="sm"
+                    type="submit"
+                    onClick={handleLoginOut}>Logout</Button>
+        </Nav>
     )
 }
 

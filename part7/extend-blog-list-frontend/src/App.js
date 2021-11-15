@@ -19,6 +19,8 @@ import User from './components/User'
 import BlogPage from './components/BlogPage'
 import BlogView from './components/BlogView'
 
+import Container from 'react-bootstrap/Container'
+
 
 const App = () => {
     const dispatch = useDispatch()
@@ -46,23 +48,25 @@ const App = () => {
 
     return (
         <Router>
-            <NavBar/>
+            <Container>
+                <NavBar/>
 
-            <Switch>
-                <Route path="/users/:id">
-                    <User/>
-                </Route>
-                <Route path="/users">
-                    <UsersPage/>
-                </Route>
-                <Route path="/blogs/:id">
-                    <BlogView/>
-                </Route>
-                <Route path="/login">
-                    <LoginPage/>
-                </Route>
-                <Route path="/" render={() => user ? <BlogPage/> : <LoginPage/>}></Route>
-            </Switch>
+                <Switch>
+                    <Route path="/users/:id">
+                        <User/>
+                    </Route>
+                    <Route path="/users">
+                        <UsersPage/>
+                    </Route>
+                    <Route path="/blogs/:id">
+                        <BlogView/>
+                    </Route>
+                    <Route path="/login">
+                        <LoginPage/>
+                    </Route>
+                    <Route path="/" render={() => user ? <BlogPage/> : <LoginPage/>}></Route>
+                </Switch>
+            </Container>
 
         </Router>
     )

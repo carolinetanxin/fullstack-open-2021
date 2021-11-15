@@ -10,6 +10,7 @@ import Blog from './Blog'
 import { setNotification } from '../reducers/notificationReducer'
 import { addLike, createBlog, removeBlog } from '../reducers/blogReducers'
 
+
 const BlogPage = () => {
     const dispatch = useDispatch()
 
@@ -80,6 +81,8 @@ const BlogPage = () => {
             <div className='login-in-title'>
                 <Notification />
             </div>
+
+            <h2>blog app</h2>
 
             <Togglable buttonLabel='create new blog' ref={blogFormRef}>
                 <BlogForm createBlog={addBlog}/>

@@ -8,6 +8,7 @@ require('express-async-errors')
 const blogRouter = require('./controllers/blog')
 const usersRouter = require('./controllers/user')
 const loginRouter = require('./controllers/login')
+const commentsRouter = require('./controllers/comments')
 
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
@@ -30,9 +31,10 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 app.use(middleware.tokenExtractor)
 
-app.use('/api/blogs', blogRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
+app.use('/api/blogs', blogRouter)
+app.use('/api/blogs', commentsRouter)
 
 if (process.env.NODE_ENV === 'test') {
     const testingRouter = require('./controllers/testing')

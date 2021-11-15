@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Button from 'react-bootstrap/Button'
 
 const BlogForm = ({ createBlog }) => {
     // 定义input时，一定要写明data的结构，不玩会报错。具体见下方链接
@@ -75,7 +76,7 @@ const BlogForm = ({ createBlog }) => {
                     </label>
                 </div>
 
-                <button id="create-blog-button" type="submit">create</button>
+                <Button id="create-blog-button" type="submit">create</Button>
             </form>
         </div>
     )

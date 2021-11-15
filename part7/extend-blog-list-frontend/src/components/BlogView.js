@@ -3,6 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useHistory, useRouteMatch } from 'react-router'
 import { addLike, removeBlog } from '../reducers/blogReducers'
 import { setNotification } from '../reducers/notificationReducer'
+import Comment from './Comment'
+import CommentForm from './CommentForm'
+
+import Button from 'react-bootstrap/Button'
 
 const BlogView = () => {
     const blogs = useSelector((state) => state.blogs)
@@ -69,13 +73,30 @@ const BlogView = () => {
             <div>
                 <span>likes </span>
                 <span className='likesNum'>{blog.likes}</span>
-                <button className='handleLike' onClick={handleLikeChange}>like</button>
+                <Button variant="danger"
+                        className='handleLike'
+                        onClick={handleLikeChange}>like</Button>
             </div>
             <div>
                 <span>Added by </span>
                 <span>{blog.user?.name}</span>
             </div>
-            <button onClick={handleRemoveBlog}>remove</button>
+            <Button variant="warning"
+                    onClick={handleRemoveBlog}>remove</Button>
+
+            <div className="comments">
+                <h2>comments</h2>
+                <CommentForm />
+                {blog.comments && blog.comments.length !== 0 ? (
+                    <ul>
+                        {blog.comments.map((comment) => (
+                            <Comment key={comment.id} comment={comment}/>
+                        ))}
+                    </ul>
+                ) : (
+                    <span>Add the first comment.</span>
+                )}
+            </div>
         </div>
     )
 }
