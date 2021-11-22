@@ -1,7 +1,12 @@
 const config = require('./utils/config')
 
 const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
+// const DataLoader = require("dataloader")
+
 const mongoose = require('mongoose')
+
+const { PubSub } = require('graphql-subscriptions')
+const pubsub = new PubSub()
 
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = 'NEED_HERE_A_SECRET_KEY'
@@ -18,33 +23,9 @@ mongoose.connect(config.MONGODB_URI)
     })
     .catch((error) => {
         console.log('error connection to MongoDB:', error.message)
-    })
+    });
 
-let authors = [
-    {
-        name: 'Robert Martin',
-        id: "afa51ab0-344d-11e9-a414-719c6709cf3e",
-        born: 1952,
-    },
-    {
-        name: 'Martin Fowler',
-        id: "afa5b6f0-344d-11e9-a414-719c6709cf3e",
-        born: 1963
-    },
-    {
-        name: 'Fyodor Dostoevsky',
-        id: "afa5b6f1-344d-11e9-a414-719c6709cf3e",
-        born: 1821
-    },
-    {
-        name: 'Joshua Kerievsky', // birthyear not known
-        id: "afa5b6f2-344d-11e9-a414-719c6709cf3e",
-    },
-    {
-        name: 'Sandi Metz', // birthyear not known
-        id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
-    }
-]
+mongoose.set('debug', true);
 
 /*
  * Suomi:
@@ -56,65 +37,13 @@ let authors = [
  * However, for simplicity, we will store the author's name in connection with the book
 */
 
-let books = [
-    {
-        title: 'Clean Code',
-        published: 2008,
-        author: 'Robert Martin',
-        id: "afa5b6f4-344d-11e9-a414-719c6709cf3e",
-        genres: ['refactoring']
-    },
-    {
-        title: 'Agile software development',
-        published: 2002,
-        author: 'Robert Martin',
-        id: "afa5b6f5-344d-11e9-a414-719c6709cf3e",
-        genres: ['agile', 'patterns', 'design']
-    },
-    {
-        title: 'Refactoring, edition 2',
-        published: 2018,
-        author: 'Martin Fowler',
-        id: "afa5de00-344d-11e9-a414-719c6709cf3e",
-        genres: ['refactoring']
-    },
-    {
-        title: 'Refactoring to patterns',
-        published: 2008,
-        author: 'Joshua Kerievsky',
-        id: "afa5de01-344d-11e9-a414-719c6709cf3e",
-        genres: ['refactoring', 'patterns']
-    },
-    {
-        title: 'Practical Object-Oriented Design, An Agile Primer Using Ruby',
-        published: 2012,
-        author: 'Sandi Metz',
-        id: "afa5de02-344d-11e9-a414-719c6709cf3e",
-        genres: ['refactoring', 'design']
-    },
-    {
-        title: 'Crime and punishment',
-        published: 1866,
-        author: 'Fyodor Dostoevsky',
-        id: "afa5de03-344d-11e9-a414-719c6709cf3e",
-        genres: ['classic', 'crime']
-    },
-    {
-        title: 'The Demon ',
-        published: 1872,
-        author: 'Fyodor Dostoevsky',
-        id: "afa5de04-344d-11e9-a414-719c6709cf3e",
-        genres: ['classic', 'revolution']
-    },
-]
-
 // GraphQL模式
 const typeDefs = gql`
   type Author {
     name: String!
     id: ID!
     born: Int
-    bookCount: Int!
+    bookCount: Int
   }
   
   type Book {
@@ -123,6 +52,10 @@ const typeDefs = gql`
     author: Author!
     id: ID!
     genres: [String!]!
+  }
+  
+  type Subscription {
+    bookAdded: Book!
   }
   
   type User {
@@ -174,67 +107,158 @@ const resolvers = {
     Query: {
         authorCount: () => Author.collection.countDocuments(),
         bookCount: () => Book.collection.countDocuments(),
-        allBooks: (root, args) => {
+        allBooks: async (root, args) => {
+
             // filters missing
             if (!args.author && !args.genre) {
-                return Book.find({})
+                const books = await Book.find({}).populate("author")
+
+                // console.log('!args.author && !args.genre')
+                // console.log(books)
+
+                return books
             }
-            return Book.find({
-                author: { $exists: !!args.author },
-                genre: { $exists: !!args.genre }
-            })
+
+            if (args.author && !args.genre) {
+                const author = await Author.findOne({ name: args.author });
+
+                const books = await Book.find({ author: { $in: author.id } }).populate(
+                    "author"
+                )
+
+                // console.log('args.author && !args.genre')
+                // console.log(books)
+
+                return books
+            }
+
+            if (!args.author && args.genre) {
+                const books = await Book.find({ genres: { $in: args.genre } }).populate(
+                    "author"
+                );
+
+                // console.log('!args.author && args.genre')
+                // console.log(books)
+
+                return books;
+            }
+
+            if (args.author && args.genre) {
+                const author = await Author.findOne({ name: args.author });
+
+                const books = await Book.find({
+                    $and: [
+                        { author: { $in: author.id } },
+                        { genres: { $in: args.genre } },
+                    ],
+                }).populate("author");
+
+                // console.log('args.author && args.genre')
+                // console.log(books)
+
+                return books;
+            }
+
+            // console.log('nothings')
+            // console.log(books)
         },
-        allAuthors: (root, args) => {
-            authors.forEach((author) => {
-                const bookCount = books.filter(book => book.author === author.name)
-                author.bookCount = bookCount.length
-                author.born = (author.born ? author.born : null)
-            })
-            return authors
-        },
-        findAuthor: (root, args) => {
-            authors.find(a => a.name === args.name)
+        allAuthors: async (root, args) => {
+            const authors = await Author.find({});
+
+            const authorsObject = authors.map((author) => {
+                return {
+                    name: author.name,
+                    born: author.born,
+                    bookCount: author.books.length,
+                    id: author.id,
+                };
+            });
+
+            return authorsObject
         },
         me: (root, args, context) => {
             return context.currentUser
         }
     },
+    Book: {
+        author: async (root, args, { loaders }) => {
+            const id = root.author;
+
+            const author = await loaders.author.load(root.author._id);
+
+            return {
+                name: author.name,
+                born: author.born,
+                bookCount: author.books.length,
+                id: root.author._id,
+            };
+        },
+    },
     Mutation: {
         addBook: async (root, args, context) => {
-            const book = new Book({ ...args })
-            const currentUser = context.currentUser
-
-            if (!currentUser) {
-                throw new AuthenticationError('not authenticated')
-            }
-
+            let book;
             try {
-                await book.save()
+                // Check if book author is already in db:
+                let author = await Author.findOne({ name: args.author });
+
+                // const currentUser = context.currentUser;
+
+                // if (!currentUser) {
+                //     throw new AuthenticationError("not authenticated");
+                // }
+
+                if (author) {
+                    book = new Book({ ...args, author: author._id });
+                    author.books = author.books.concat(book._id);
+
+                    await book.save();
+                    await author.save();
+
+                    // 返回的book中，author为对象，而非id
+                    book.author = author;
+                }
+
+                if (!author) {
+                    const _id = mongoose.Types.ObjectId();
+                    book = new Book({ ...args, author: _id });
+
+                    author = new Author({
+                        name: args.author,
+                        born: null,
+                        bookCount: 1,
+                        _id,
+                        books: [book._id],
+                    });
+
+                    await author.save();
+                    await book.save();
+
+                    // 返回的book中，author为对象，而非id
+                    book.author = author;
+                }
             } catch (e) {
+                console.log('bookadded error')
+                console.log(e)
                 throw new UserInputError(e.message, {
                     invalidArgs: args
                 })
             }
+            // console.log('BOOK_ADDED')
+            // console.log(book)
+            await pubsub.publish('BOOK_ADDED', { bookAdded: book })
+
+            // console.log('BOOK_ADDED')
+            // console.log(book)
 
             return book
-            // const book = { ...args, id: uuid() }
-            // books = books.concat(book)
-            // if (authors.findIndex(author => author.name === args.author) === -1) {
-            //     authors = authors.concat({
-            //         name: args.author,
-            //         born: null,
-            //         bookCount: 1,
-            //         id: uuid()
-            //     })
-            // }
-            // return book
         },
         editAuthor: async (root, args, context) => {
             const author = await Author.findOne({ name: args.name })
+            if (!author) return null
+
             author.born = args.setBornTo
 
             const currentUser = context.currentUser
-            console.log(context)
 
             if (!currentUser) {
                 throw new AuthenticationError('not authenticated')
@@ -249,12 +273,7 @@ const resolvers = {
             }
 
             return author
-            // const author = authors.find(author => author.name === args.name)
-            // if (!author) { return null }
-            //
-            // const updatedAuthor = { ...author, born: args.setBornTo }
-            // authors = authors.map(author => author.name === args.name ? updatedAuthor : author)
-            // return updatedAuthor
+
         },
         createUser: async (root, args) => {
             const user = new User({ ...args })
@@ -283,7 +302,12 @@ const resolvers = {
 
             return { value: jwt.sign(userForToken, JWT_SECRET) }
         }
-    }
+    },
+    Subscription: {
+        bookAdded: {
+            subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+        },
+    },
 
 }
 
@@ -303,6 +327,7 @@ const server = new ApolloServer({
     }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
     console.log(`Server ready at ${url}`)
+    console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })

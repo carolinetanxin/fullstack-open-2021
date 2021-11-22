@@ -1,15 +1,29 @@
 import { gql } from '@apollo/client'
 
+const BOOK_DETAILS = gql`
+  fragment BookDetails on Book {
+    title
+    author {
+      name
+      bookCount
+      born
+    }
+    published
+    genres
+    id
+  }
+`;
+
 // 获取所有书本
 export const ALL_BOOKS = gql`
   query {
     allBooks {
-      title
-      published
-      author
+      ...BookDetails
     }
   }
+  ${BOOK_DETAILS}
 `;
+
 
 // 获取所有作者
 export const ALL_AUTHORS = gql`
@@ -36,13 +50,19 @@ export const CREATE_BOOK = gql`
     author: $author
     genres: $genres
   ) {
-    title,
-    published
-    author
-    genres
-    id
+    ...BookDetails
   }
  }
+ ${BOOK_DETAILS}
+`;
+
+export const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+    }
+  }
+  ${BOOK_DETAILS}
 `;
 
 // 更新作者年份
